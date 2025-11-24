@@ -57,12 +57,6 @@ export const addPersonalProblem = async (problem: PersonalProblemInput): Promise
     throw error;
   }
 
-  if (!data) {
-    throw new Error('No data returned after insert');
-  }
-
-  console.log('Added personal problem:', data);
-
   return data;
 };
 

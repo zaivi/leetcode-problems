@@ -39,10 +39,9 @@ export const ProblemTable: React.FC<ProblemTableProps> = ({
       showAlert(`"${problem.title}" added to My Problems!`, 'success');
     } catch (error: any) {
       if (error.message?.includes('already exists')) {
-        showAlert('Problem already in My Problems', 'warning');
+        showAlert('Problem already in My Problems.', 'warning');
       } else {
-        console.error('Failed to add problem:', error);
-        showAlert('Failed to add problem. Please try again.', 'error');
+        showAlert('You must be signed in to add problems to My Problems.', 'warning');
       }
     } finally {
       setAddingProblem(null);

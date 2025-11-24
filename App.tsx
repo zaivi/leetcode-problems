@@ -196,12 +196,21 @@ const App: React.FC = () => {
       user_id: userId,
     };
 
-    const newProblem = await addPersonalProblem(personalProblem);
-    setPersonalProblems([newProblem, ...personalProblems]);
-    setMyProblemsProgress({
-      ...myProblemsProgress,
-      [newProblem.id.toString()]: { status: Status.NotStarted, remarks: '' }
+    await addPersonalProblem(personalProblem);
+    
+    // Refetch all problems with proper sorting (created_at descending)
+    const updatedProblems = await fetchPersonalProblems();
+    setPersonalProblems(updatedProblems);
+    
+    // Update progress map for all problems
+    const myProblemsProgressMap: { [id: string]: { status: Status; remarks: string } } = {};
+    updatedProblems.forEach(prob => {
+      myProblemsProgressMap[prob.id.toString()] = {
+        status: (prob.status as Status) || Status.NotStarted,
+        remarks: prob.remarks || ''
+      };
     });
+    setMyProblemsProgress(myProblemsProgressMap);
   };
 
   // Delete Personal Problem
