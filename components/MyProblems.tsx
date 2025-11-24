@@ -79,7 +79,7 @@ export const MyProblems: React.FC<MyProblemsProps> = ({
 
   const filteredProblems = useMemo(() => {
     return problems.filter((p) => {
-      const userState = progressMap[p.link || '']?.status || Status.Todo;
+      const userState = progressMap[p.id.toString()]?.status || Status.NotStarted;
       
       const matchesDiff = filterDifficulty === 'All' || p.difficulty === filterDifficulty;
       const matchesStatus = filterStatus === 'All' || userState === filterStatus;
@@ -112,6 +112,8 @@ export const MyProblems: React.FC<MyProblemsProps> = ({
         return <Clock size={16} className="text-yellow-500" />;
       case Status.Revise:
         return <RotateCcw size={16} className="text-purple-500" />;
+      case Status.NotStarted:
+        return <Circle size={16} style={{color: '#7030A1'}} />;
       default:
         return <Circle size={16} className="text-slate-600" />;
     }
@@ -146,11 +148,11 @@ export const MyProblems: React.FC<MyProblemsProps> = ({
           className="bg-dark-900 border border-dark-700 rounded px-3 py-1.5 text-sm text-slate-200 focus:border-primary-500 outline-none"
         >
           <option value="All">All Statuses</option>
-          <option value={Status.NotStarted}>Not Started</option>
-          <option value={Status.Todo}>Todo</option>
-          <option value={Status.Solving}>Solving</option>
-          <option value={Status.Solved}>Solved</option>
-          <option value={Status.Revise}>Revise</option>
+          <option value={Status.NotStarted.toString()}>Not Started</option>
+          <option value={Status.Todo.toString()}>Todo</option>
+          <option value={Status.Solving.toString()}>Solving</option>
+          <option value={Status.Solved.toString()}>Solved</option>
+          <option value={Status.Revise.toString()}>Revise</option>
         </select>
 
         <div className="ml-auto text-xs text-slate-500">

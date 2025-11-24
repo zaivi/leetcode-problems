@@ -32,7 +32,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ progressMap, totalProblems
     { label: 'Solving', value: solvingCount, color: '#f59e0b' }, // Amber 500
     { label: 'Revise', value: reviseCount, color: '#f43f5e' }, // Rose 500
     { label: 'Todo', value: todoCount, color: '#3b82f6' }, // Blue 500
-    { label: 'Not Started', value: notStartedCount, color: '#64748b' }, // Slate 500
+    { label: 'Not Started', value: notStartedCount, color: '#7030A1' }, // Purple
   ].filter(d => d.value > 0);
 
   const chartData = {
@@ -120,9 +120,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ progressMap, totalProblems
           <StatCard 
             title="Not Started" 
             value={notStartedCount} 
-            icon={<Circle className="text-slate-500" size={24} />} 
-            borderColor="border-slate-500/30"
-            bgColor="bg-slate-500/5"
+            icon={<Circle style={{color: '#7030A1'}} size={24} />} 
+            borderColor="border-[#7030A1]/30"
+            bgColor="bg-[#7030A1]/5"
           />
           <StatCard 
             title="Total Tracked" 

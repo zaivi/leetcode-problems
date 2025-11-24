@@ -67,7 +67,8 @@ export interface PersonalProblemInput {
   title: string;
   link: string;
   topics?: string;
-  status?: Status;
+  status?: Status | string; // Allow string to support database updates
+  remarks?: string;
   user_id?: string;
 }
 

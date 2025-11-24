@@ -6,14 +6,6 @@ import { PersonalProblem, PersonalProblemInput } from '../types';
  * RLS policies automatically filter by user_id
  */
 export const fetchPersonalProblems = async (): Promise<PersonalProblem[]> => {
-  // Verify user is authenticated
-  const { data: { user } } = await supabase.auth.getUser();
-  
-  if (!user) {
-    console.warn('No authenticated user when fetching personal problems');
-    return [];
-  }
-
   const { data, error } = await supabase
     .from('personal_problems')
     .select('*')
@@ -34,23 +26,11 @@ export const fetchPersonalProblems = async (): Promise<PersonalProblem[]> => {
  * user_id should be explicitly passed to ensure proper RLS filtering
  */
 export const addPersonalProblem = async (problem: PersonalProblemInput): Promise<PersonalProblem> => {
-  // Get current user to ensure user_id is set
-  const { data: { user } } = await supabase.auth.getUser();
-  
-  if (!user) {
-    throw new Error('User must be authenticated to add problems');
-  }
-
-  // Ensure user_id is set
-  const problemWithUser = {
-    ...problem,
-    user_id: user.id
-  };
-
   const { data, error } = await supabase
     .from('personal_problems')
-    .insert(problemWithUser)
-    .select();
+    .insert(problem)
+    .select()
+    .single();
 
   if (error) {
     console.error('Error adding personal problem:', error);
@@ -62,11 +42,13 @@ export const addPersonalProblem = async (problem: PersonalProblemInput): Promise
 
 /**
  * Update a personal problem
+ * Returns the updated problem or null if not found
  */
 export const updatePersonalProblem = async (
   id: number,
   updates: Partial<PersonalProblemInput>
 ): Promise<PersonalProblem> => {
+  // Update the record and return the updated row
   const { data, error } = await supabase
     .from('personal_problems')
     .update(updates)
@@ -79,6 +61,11 @@ export const updatePersonalProblem = async (
     throw error;
   }
 
+  if (!data) {
+    throw new Error('Problem not found or you do not have permission to update it');
+  }
+
+  console.log('Successfully updated problem:', data);
   return data;
 };
 
