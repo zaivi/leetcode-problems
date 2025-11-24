@@ -1,0 +1,5 @@
+{
+  "name": "LeetTrack Pro",
+  "description": "A comprehensive LeetCode progress tracker sourcing data from GitHub company-wise problem lists. Features local progress saving, performance analytics, and Gemini-powered hints.",
+  "requestFramePermissions": []
+}
