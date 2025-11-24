@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ExternalLink, Sparkles, Plus } from 'lucide-react';
 import { Problem, Difficulty } from '../types';
 import { Alert, Snackbar } from '@mui/material';
@@ -32,11 +32,122 @@ export const ProblemTable: React.FC<ProblemTableProps> = ({
     setAlert({ open: true, message, severity });
   };
 
+  const showSuccessToast = (message: string) => {
+    // Create toast element directly in DOM - won't be affected by React re-renders
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+      position: fixed;
+      top: 40px;
+      right: 24px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: #1e293b;
+      padding: 14px 20px;
+      border-radius: 12px;
+      box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.08),
+        0 8px 32px rgba(0, 0, 0, 0.06),
+        inset 0 0 0 1px rgba(16, 185, 129, 0.2);
+      z-index: 99999;
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: gentleSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      max-width: 380px;
+      line-height: 1.4;
+    `;
+    
+    // Add checkmark icon
+    const icon = document.createElement('span');
+    icon.innerHTML = `
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="10" cy="10" r="10" fill="#10b981" fill-opacity="0.15"/>
+        <path d="M6 10L8.5 12.5L14 7" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    `;
+    icon.style.cssText = `
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      animation: checkPop 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.1s backwards;
+    `;
+    
+    const textSpan = document.createElement('span');
+    textSpan.textContent = message;
+    textSpan.style.cssText = `
+      color: #334155;
+      font-weight: 500;
+    `;
+    
+    toast.appendChild(icon);
+    toast.appendChild(textSpan);
+    
+    // Add animation keyframes if not already added
+    if (!document.getElementById('toast-animation-styles')) {
+      const style = document.createElement('style');
+      style.id = 'toast-animation-styles';
+      style.textContent = `
+        @keyframes gentleSlideIn {
+          from {
+            transform: translateY(10px) translateX(20px);
+            opacity: 0;
+            scale: 0.95;
+          }
+          to {
+            transform: translateY(0) translateX(0);
+            opacity: 1;
+            scale: 1;
+          }
+        }
+        @keyframes gentleSlideOut {
+          from {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+          }
+          to {
+            transform: translateY(-8px) scale(0.98);
+            opacity: 0;
+          }
+        }
+        @keyframes checkPop {
+          from {
+            transform: scale(0);
+            opacity: 0;
+          }
+          50% {
+            transform: scale(1.1);
+          }
+          to {
+            transform: scale(1);
+            opacity: 1;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    
+    document.body.appendChild(toast);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+      toast.style.animation = 'gentleSlideOut 0.35s cubic-bezier(0.4, 0, 1, 1)';
+      setTimeout(() => {
+        if (document.body.contains(toast)) {
+          document.body.removeChild(toast);
+        }
+      }, 350);
+    }, 3000);
+  };
+
   const handleAddToMyProblems = async (problem: Problem) => {
     setAddingProblem(problem.id);
     try {
       await onAddToMyProblems(problem);
-      showAlert(`"${problem.title}" added to My Problems!`, 'success');
+      showSuccessToast(`"${problem.title}" added to My Problems!`);
     } catch (error: any) {
       console.error('Error adding problem to My Problems:', error);
       if (error.message?.includes('already exists')) {
@@ -241,7 +352,9 @@ export const ProblemTable: React.FC<ProblemTableProps> = ({
                 <button 
                   onClick={() => handleAddToMyProblems(problem)}
                   disabled={addingProblem === problem.id}
-                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-green-400 hover:text-green-300 bg-green-400/10 hover:bg-green-400/20 rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded disabled:cursor-not-allowed transition-all ${
+                    'text-green-400 hover:text-green-300 bg-green-400/10 hover:bg-green-400/20 disabled:opacity-50'
+                  }`}
                   title="Add to My Problems"
                 >
                   <Plus size={16} />
@@ -274,7 +387,8 @@ export const ProblemTable: React.FC<ProblemTableProps> = ({
         open={alert.open}
         autoHideDuration={3000}
         onClose={() => setAlert({ ...alert, open: false })}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        sx={{ zIndex: 9999, marginTop: '40px', marginRight: '24px' }}
       >
         <Alert
           onClose={() => setAlert({ ...alert, open: false })}

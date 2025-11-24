@@ -143,7 +143,6 @@ export const syncLocalProgressToSupabase = async (userId: string): Promise<void>
 
   try {
     await saveProgress(localProgress, userId);
-    console.log('Local progress synced to Supabase');
   } catch (e) {
     console.error('Failed to sync local progress to Supabase', e);
   }
