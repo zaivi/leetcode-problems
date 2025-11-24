@@ -111,9 +111,6 @@ export const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
             >
               Continue as Guest
             </button>
-            <p className="mt-2 text-xs text-center text-slate-500">
-              Guest mode uses local storage only
-            </p>
           </div>
         </div>
       </div>

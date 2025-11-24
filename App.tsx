@@ -184,15 +184,11 @@ const App: React.FC = () => {
     }
 
     try {
-      console.log('Updating status:', { id, status, statusValue: status.toString() });
-      
       // Update the personal_problems table directly
       // Convert Status enum to string value
       const updated = await updatePersonalProblem(parseInt(id), { 
         status: status as any // The enum value will be the string
       });
-      
-      console.log('Status updated successfully:', updated);
       
       // Update local state
       setMyProblemsProgress({
@@ -214,12 +210,8 @@ const App: React.FC = () => {
     }
 
     try {
-      console.log('Updating remarks:', { id, remarks });
-      
       // Update the personal_problems table directly
       const updated = await updatePersonalProblem(parseInt(id), { remarks });
-      
-      console.log('Remarks updated successfully:', updated);
       
       // Update local state
       setMyProblemsProgress({

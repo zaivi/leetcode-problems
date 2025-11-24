@@ -90,6 +90,13 @@ export const Layout: React.FC<LayoutProps> = ({
       <main className="flex-1 overflow-hidden relative">
         {children}
       </main>
+
+      {/* Footer */}
+      <footer className="h-8 border-t border-dark-700 bg-dark-800 flex items-center justify-center px-4 shrink-0 z-20">
+        <span className="text-xs text-slate-500">
+          {process.env.LEETTRACK_VERSION || 'v0.0.0'}
+        </span>
+      </footer>
     </div>
   );
 };

@@ -16,9 +16,26 @@ export const fetchPersonalProblems = async (): Promise<PersonalProblem[]> => {
     throw error;
   }
 
-  console.log('Fetched personal problems:', data?.length || 0, 'problems');
-
   return data || [];
+};
+
+/**
+ * Fetch a single personal problem by ID
+ * RLS policies automatically filter by user_id
+ */
+export const fetchPersonalProblemById = async (id: number): Promise<PersonalProblem | null> => {
+  const { data, error } = await supabase
+    .from('personal_problems')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Error fetching personal problem:', error);
+    throw error;
+  }
+
+  return data;
 };
 
 /**
@@ -57,15 +74,10 @@ export const updatePersonalProblem = async (
     .single();
 
   if (error) {
-    console.error('Error updating personal problem:', error);
+    console.error('Error updating personal problem:', { id, error });
     throw error;
   }
 
-  if (!data) {
-    throw new Error('Problem not found or you do not have permission to update it');
-  }
-
-  console.log('Successfully updated problem:', data);
   return data;
 };
 
