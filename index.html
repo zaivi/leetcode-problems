@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
     <link rel="mask-icon" href="https://github.githubassets.com/assets/pinned-octocat-093da3e6fa40.svg" color="#000000">
     <title>LeetTrack Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -40,6 +40,39 @@
       }
       ::-webkit-scrollbar-thumb:hover {
         background: #475569; 
+      }
+
+      /* Mobile-specific improvements */
+      @media (max-width: 768px) {
+        /* Make scrollbars thinner on mobile */
+        ::-webkit-scrollbar {
+          width: 4px;
+          height: 4px;
+        }
+      }
+
+      /* Smooth scrolling and touch improvements */
+      * {
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        -webkit-touch-callout: none;
+      }
+
+      html {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      /* Prevent text selection on buttons and interactive elements */
+      button, a {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+
+      /* Smooth momentum scrolling on iOS */
+      .overflow-auto, .overflow-y-auto, .overflow-x-auto {
+        -webkit-overflow-scrolling: touch;
       }
     </style>
   <script type="importmap">

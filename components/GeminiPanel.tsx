@@ -45,18 +45,36 @@ export const GeminiPanel: React.FC<GeminiPanelProps> = ({ problem, onClose, apiK
   if (!problem) return null;
 
   return (
-    <div className="w-80 border-l border-dark-700 bg-dark-800 flex flex-col h-full shadow-2xl absolute right-0 top-0 bottom-0 z-20">
-      <div className="p-4 border-b border-dark-700 flex items-center justify-between bg-dark-900">
-        <div className="flex items-center gap-2 text-purple-400 font-semibold">
-          <Sparkles size={18} />
-          <span>AI Hint</span>
+    <>
+      {/* Mobile Overlay */}
+      <div 
+        className="lg:hidden fixed inset-0 bg-black/50 z-30"
+        onClick={onClose}
+      />
+      
+      {/* Panel */}
+      <div className="
+        fixed lg:absolute
+        inset-0 lg:inset-auto
+        lg:right-0 lg:top-0 lg:bottom-0
+        w-full lg:w-80
+        border-0 lg:border-l border-dark-700 
+        bg-dark-800 
+        flex flex-col 
+        shadow-2xl 
+        z-40
+      ">
+        <div className="p-4 border-b border-dark-700 flex items-center justify-between bg-dark-900">
+          <div className="flex items-center gap-2 text-purple-400 font-semibold">
+            <Sparkles size={18} />
+            <span>AI Hint</span>
+          </div>
+          <button onClick={onClose} className="text-slate-400 hover:text-white p-2 hover:bg-dark-800 rounded-lg transition-colors">
+            <X size={20} />
+          </button>
         </div>
-        <button onClick={onClose} className="text-slate-400 hover:text-white">
-          <X size={18} />
-        </button>
-      </div>
 
-      <div className="p-5 flex-1 overflow-y-auto">
+        <div className="p-4 sm:p-5 flex-1 overflow-y-auto">
         <h3 className="font-medium text-white mb-1">{problem.title}</h3>
         <span className={`text-xs px-2 py-0.5 rounded-full border mb-4 inline-block
           ${problem.difficulty === 'Easy' ? 'text-green-400 border-green-900 bg-green-900/20' : 
@@ -93,16 +111,17 @@ export const GeminiPanel: React.FC<GeminiPanelProps> = ({ problem, onClose, apiK
         </div>
       </div>
       
-      {/* Footer Actions */}
-      <div className="p-4 border-t border-dark-700">
-          <button 
-             onClick={fetchHint}
-             disabled={loading}
-             className="w-full py-2 bg-dark-700 hover:bg-dark-600 text-white rounded-md text-sm font-medium transition-colors disabled:opacity-50"
-          >
-              Regenerate Hint
-          </button>
+        {/* Footer Actions */}
+        <div className="p-4 border-t border-dark-700">
+            <button 
+               onClick={fetchHint}
+               disabled={loading}
+               className="w-full py-2 sm:py-2.5 bg-dark-700 hover:bg-dark-600 text-white rounded-md text-sm font-medium transition-colors disabled:opacity-50"
+            >
+                Regenerate Hint
+            </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 };

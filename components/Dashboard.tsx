@@ -1,6 +1,6 @@
 import React from 'react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import { Pie } from 'react-chartjs-2';
+import { Doughnut } from 'react-chartjs-2';
 import { ProgressMap, Status, UserProgress } from '../types';
 import { CheckCircle2, Circle, Clock, RotateCcw, Trophy } from 'lucide-react';
 
@@ -26,13 +26,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ progressMap, totalProblems
   const reviseCount = stats[Status.Revise] || 0;
   const totalTracked = notStartedCount + todoCount + solvingCount + solvedCount + reviseCount;
 
-  // Prepare data for Chart.js
+  // Prepare data for Chart.js with enhanced colors
   const statusData = [
     { label: 'Solved', value: solvedCount, color: '#10b981' }, // Emerald 500
     { label: 'Solving', value: solvingCount, color: '#f59e0b' }, // Amber 500
-    { label: 'Revise', value: reviseCount, color: '#f43f5e' }, // Rose 500
     { label: 'Todo', value: todoCount, color: '#3b82f6' }, // Blue 500
-    { label: 'Not Started', value: notStartedCount, color: '#7030A1' }, // Purple
+    { label: 'Revise', value: reviseCount, color: '#ec4899' }, // Pink 500
+    { label: 'Not Started', value: notStartedCount, color: '#8b5cf6' }, // Violet 500
   ].filter(d => d.value > 0);
 
   const chartData = {
@@ -41,27 +41,60 @@ export const Dashboard: React.FC<DashboardProps> = ({ progressMap, totalProblems
       {
         data: statusData.map(d => d.value),
         backgroundColor: statusData.map(d => d.color),
-        borderColor: '#1e293b',
-        borderWidth: 2,
+        borderColor: '#0f172a',
+        borderWidth: 3,
+        hoverBorderColor: '#ffffff',
+        hoverBorderWidth: 3,
+        hoverOffset: 8,
+        spacing: 2,
       },
     ],
+  };
+
+  // Plugin to draw text in the center of the donut
+  const centerTextPlugin = {
+    id: 'centerText',
+    beforeDraw: (chart: any) => {
+      const { ctx, chartArea: { width, height } } = chart;
+      ctx.save();
+      
+      const centerX = width / 2;
+      const centerY = height / 2;
+      
+      // Draw total number
+      ctx.font = 'bold 32px sans-serif';
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(totalTracked.toString(), centerX, centerY - 10);
+      
+      // Draw label
+      ctx.font = '14px sans-serif';
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText('Problems', centerX, centerY + 20);
+      
+      ctx.restore();
+    }
   };
 
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
+    cutout: '70%', // Creates the donut effect
     plugins: {
       legend: {
         display: false, // We'll use custom legend
       },
       tooltip: {
-        backgroundColor: '#1e293b',
+        backgroundColor: '#0f172a',
         titleColor: '#fff',
-        bodyColor: '#fff',
-        borderColor: '#334155',
+        bodyColor: '#e2e8f0',
+        borderColor: '#475569',
         borderWidth: 1,
         padding: 12,
         displayColors: true,
+        boxPadding: 6,
+        usePointStyle: true,
         callbacks: {
           label: function(context: any) {
             const label = context.label || '';
@@ -72,6 +105,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ progressMap, totalProblems
           }
         }
       },
+      centerText: true,
     },
   };
 
@@ -79,16 +113,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ progressMap, totalProblems
   // For now, we simulate "Tasks by Status"
   
   return (
-    <div className="h-full overflow-y-auto p-6 bg-dark-900">
-      <div className="max-w-5xl mx-auto space-y-6">
+    <div className="h-full overflow-y-auto p-4 sm:p-6 bg-dark-900">
+      <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
         
         <header>
-          <h2 className="text-2xl font-bold text-white mb-1">Your Progress</h2>
-          <p className="text-slate-400">Overview of your LeetCode journey across tracked companies.</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-white mb-1">Your Progress</h2>
+          <p className="text-sm sm:text-base text-slate-400">Overview of your LeetCode journey across tracked companies.</p>
         </header>
 
         {/* Key Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
           <StatCard 
             title="Solved" 
             value={solvedCount} 
@@ -134,14 +168,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ progressMap, totalProblems
         </div>
 
         {/* Charts Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Status Distribution */}
-          <div className="bg-dark-800 border border-dark-700 rounded-xl p-6 shadow-sm">
-            <h3 className="font-semibold text-lg text-slate-200 mb-4">Status Distribution</h3>
-            <div className="h-64 w-full flex items-center justify-center">
+          <div className="bg-gradient-to-br from-dark-800 to-dark-900 border border-dark-700 rounded-xl p-4 sm:p-6 shadow-lg">
+            <h3 className="font-semibold text-base sm:text-lg text-slate-200 mb-6">Status Distribution</h3>
+            <div className="h-56 sm:h-72 w-full flex items-center justify-center mb-6">
               {statusData.length > 0 ? (
-                <div className="w-full h-full max-w-md mx-auto">
-                  <Pie data={chartData} options={chartOptions} />
+                <div className="w-full h-full max-w-sm mx-auto relative">
+                  <Doughnut data={chartData} options={chartOptions} plugins={[centerTextPlugin]} />
                 </div>
               ) : (
                 <div className="flex items-center justify-center h-full text-slate-500">
@@ -150,21 +184,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ progressMap, totalProblems
               )}
             </div>
             {/* Custom Legend */}
-            <div className="flex flex-wrap justify-center gap-4 mt-4">
+            <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
               {statusData.map(item => (
-                <div key={item.label} className="flex items-center gap-1.5 text-xs text-slate-300">
-                  <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: item.color }} />
-                  <span>{item.label}</span>
-                  <span className="text-slate-400">({item.value})</span>
+                <div key={item.label} className="flex items-center gap-2 text-xs sm:text-sm text-slate-300 group hover:text-white transition-colors">
+                  <div 
+                    className="w-3 h-3 rounded-full shadow-lg group-hover:scale-110 transition-transform" 
+                    style={{ backgroundColor: item.color, boxShadow: `0 0 8px ${item.color}40` }} 
+                  />
+                  <span className="font-medium">{item.label}</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Tips Card */}
-          <div className="bg-dark-800 border border-dark-700 rounded-xl p-6 shadow-sm flex flex-col">
-            <h3 className="font-semibold text-lg text-slate-200 mb-4">Quick Tips</h3>
-            <div className="flex-1 space-y-4 text-sm text-slate-400">
+          <div className="bg-dark-800 border border-dark-700 rounded-xl p-4 sm:p-6 shadow-sm flex flex-col">
+            <h3 className="font-semibold text-base sm:text-lg text-slate-200 mb-4">Quick Tips</h3>
+            <div className="flex-1 space-y-3 sm:space-y-4 text-xs sm:text-sm text-slate-400">
               <div className="p-3 bg-dark-700/50 rounded-lg border border-dark-600">
                 <strong className="text-slate-200 block mb-1">Company Tags</strong>
                 Focus on the "Six Months" or "All" lists for specific companies if you have an interview coming up.
@@ -190,13 +226,15 @@ const StatCard: React.FC<{ title: string; value: number; icon: React.ReactNode; 
   title, value, icon, borderColor, bgColor 
 }) => {
   return (
-    <div className={`p-4 rounded-xl border ${borderColor} ${bgColor} flex items-center justify-between`}>
-      <div>
-        <p className="text-slate-400 text-xs uppercase tracking-wider font-semibold">{title}</p>
-        <p className="text-2xl font-bold text-slate-100 mt-1">{value}</p>
+    <div className={`p-3 sm:p-4 rounded-xl border ${borderColor} ${bgColor} flex items-center justify-between`}>
+      <div className="min-w-0 flex-1">
+        <p className="text-slate-400 text-[10px] sm:text-xs uppercase tracking-wider font-semibold truncate">{title}</p>
+        <p className="text-xl sm:text-2xl font-bold text-slate-100 mt-1">{value}</p>
       </div>
-      <div className="opacity-80">
-        {icon}
+      <div className="opacity-80 ml-2">
+        <div className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center">
+          {icon}
+        </div>
       </div>
     </div>
   );

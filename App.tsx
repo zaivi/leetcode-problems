@@ -313,86 +313,110 @@ const App: React.FC = () => {
   }
 
   // Explorer component
-  const ExplorerView = () => (
-    <div className="flex h-full">
-      {/* Company Sidebar */}
-      <CompanySidebar 
-        companies={companies} 
-        selectedCompany={selectedCompany} 
-        onSelectCompany={handleSelectCompany}
-        loading={loadingCompanies}
-      />
+  const ExplorerView = () => {
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
-      {/* Main Problem Area */}
-      <div className="flex-1 flex flex-col min-w-0 bg-dark-900 relative">
-        
-        {/* Context Bar (Selected Company & Period) */}
-        {selectedCompany && (
-          <div className="px-4 py-2 bg-dark-800 border-b border-dark-700 flex items-center justify-between shrink-0">
-            <h2 className="text-white font-medium flex items-center gap-2">
-              <span className="text-slate-400">{selectedCompany.name}</span>
-              <span className="text-slate-600">/</span>
-              <span className="text-primary-400">{selectedFile?.name || 'Select Period'}</span>
-            </h2>
-            
-            <div className="flex gap-2">
-              {loadingFiles ? (
-                <span className="text-xs text-slate-500">Loading periods...</span>
-              ) : (
-                files.map(f => (
-                  <button
-                    key={f.path}
-                    onClick={() => handleSelectFile(f, selectedCompany.name)}
-                    className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
-                      selectedFile?.path === f.path 
-                        ? 'bg-primary-600 text-white' 
-                        : 'bg-dark-700 text-slate-300 hover:bg-dark-600'
-                    }`}
-                  >
-                    {f.name}
-                  </button>
-                ))
-              )}
+    return (
+      <div className="flex h-full relative">
+        {/* Company Sidebar */}
+        <CompanySidebar 
+          companies={companies} 
+          selectedCompany={selectedCompany} 
+          onSelectCompany={handleSelectCompany}
+          loading={loadingCompanies}
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+        />
+
+        {/* Main Problem Area */}
+        <div className="flex-1 flex flex-col min-w-0 bg-dark-900 relative">
+          
+          {/* Context Bar (Selected Company & Period) */}
+          {selectedCompany && (
+            <div className="px-4 py-2 bg-dark-800 border-b border-dark-700 flex flex-col sm:flex-row items-start sm:items-center gap-2 shrink-0">
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                {/* Mobile Sidebar Toggle */}
+                <button
+                  onClick={() => setSidebarOpen(true)}
+                  className="lg:hidden p-1 text-slate-400 hover:text-white hover:bg-dark-700 rounded transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </button>
+                
+                <h2 className="text-white font-medium flex items-center gap-2 text-sm sm:text-base flex-1 min-w-0">
+                  <span className="text-slate-400 truncate">{selectedCompany.name}</span>
+                  <span className="text-slate-600">/</span>
+                  <span className="text-primary-400 truncate">{selectedFile?.name || 'Select Period'}</span>
+                </h2>
+              </div>
+              
+              <div className="flex gap-2 flex-wrap w-full sm:w-auto">
+                {loadingFiles ? (
+                  <span className="text-xs text-slate-500">Loading periods...</span>
+                ) : (
+                  files.map(f => (
+                    <button
+                      key={f.path}
+                      onClick={() => handleSelectFile(f, selectedCompany.name)}
+                      className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                        selectedFile?.path === f.path 
+                          ? 'bg-primary-600 text-white' 
+                          : 'bg-dark-700 text-slate-300 hover:bg-dark-600'
+                      }`}
+                    >
+                      {f.name}
+                    </button>
+                  ))
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Error Banner */}
-        {error && (
-          <div className="p-4 bg-red-900/20 border-b border-red-900/50 text-red-200 text-sm">
-            {error}
-          </div>
-        )}
+          {/* Error Banner */}
+          {error && (
+            <div className="p-4 bg-red-900/20 border-b border-red-900/50 text-red-200 text-sm">
+              {error}
+            </div>
+          )}
 
-        {/* Content */}
-        {!selectedCompany ? (
-          <div className="flex-1 flex flex-col items-center justify-center text-slate-500">
-            <p>Select a company from the sidebar to view problems.</p>
-          </div>
-        ) : loadingProblems ? (
-           <div className="flex-1 flex flex-col items-center justify-center text-slate-400">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500 mb-4"></div>
-              Loading problems...
-           </div>
-        ) : (
-          <ProblemTable 
-            problems={problems}
-            onAskAI={setActiveAIProblem}
-            onAddToMyProblems={handleAddToMyProblems}
-          />
-        )}
-        
-        {/* AI Panel Overlay */}
-        {activeAIProblem && (
-            <GeminiPanel 
-              problem={activeAIProblem} 
-              onClose={() => setActiveAIProblem(null)}
-              apiKey={aiApiKey}
+          {/* Content */}
+          {!selectedCompany ? (
+            <div className="flex-1 flex flex-col items-center justify-center text-slate-500 p-4 text-center">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="lg:hidden mb-4 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors"
+              >
+                Browse Companies
+              </button>
+              <p>Select a company from the sidebar to view problems.</p>
+            </div>
+          ) : loadingProblems ? (
+             <div className="flex-1 flex flex-col items-center justify-center text-slate-400">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500 mb-4"></div>
+                Loading problems...
+             </div>
+          ) : (
+            <ProblemTable 
+              problems={problems}
+              onAskAI={setActiveAIProblem}
+              onAddToMyProblems={handleAddToMyProblems}
             />
-        )}
+          )}
+          
+          {/* AI Panel Overlay */}
+          {activeAIProblem && (
+              <GeminiPanel 
+                problem={activeAIProblem} 
+                onClose={() => setActiveAIProblem(null)}
+                apiKey={aiApiKey}
+              />
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <Layout 

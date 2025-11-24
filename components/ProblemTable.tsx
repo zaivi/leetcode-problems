@@ -38,10 +38,11 @@ export const ProblemTable: React.FC<ProblemTableProps> = ({
       await onAddToMyProblems(problem);
       showAlert(`"${problem.title}" added to My Problems!`, 'success');
     } catch (error: any) {
+      console.error('Error adding problem to My Problems:', error);
       if (error.message?.includes('already exists')) {
         showAlert('Problem already in My Problems.', 'warning');
       } else {
-        showAlert('You must be signed in to add problems to My Problems.', 'warning');
+        showAlert(error.message || 'Failed to add problem. Please try again.', 'error');
       }
     } finally {
       setAddingProblem(null);
@@ -71,19 +72,19 @@ export const ProblemTable: React.FC<ProblemTableProps> = ({
   return (
     <div className="flex flex-col h-full bg-dark-900">
       {/* Filters Toolbar */}
-      <div className="p-4 border-b border-dark-700 flex flex-wrap gap-4 items-center bg-dark-800/50">
+      <div className="p-3 sm:p-4 border-b border-dark-700 flex flex-wrap gap-2 sm:gap-4 items-center bg-dark-800/50">
         <input
           type="text"
-          placeholder="Search by title, ID, or topics..."
+          placeholder="Search problems..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="bg-dark-900 border border-dark-700 rounded px-3 py-1.5 text-sm text-slate-200 focus:border-primary-500 outline-none w-64"
+          className="bg-dark-900 border border-dark-700 rounded px-3 py-1.5 text-sm text-slate-200 focus:border-primary-500 outline-none w-full sm:w-64"
         />
         
         <select 
           value={filterDifficulty}
           onChange={(e) => setFilterDifficulty(e.target.value as any)}
-          className="bg-dark-900 border border-dark-700 rounded px-3 py-1.5 text-sm text-slate-200 focus:border-primary-500 outline-none"
+          className="bg-dark-900 border border-dark-700 rounded px-3 py-1.5 text-sm text-slate-200 focus:border-primary-500 outline-none flex-1 sm:flex-initial"
         >
           <option value="All">All Difficulties</option>
           <option value={Difficulty.Easy}>Easy</option>
@@ -91,13 +92,13 @@ export const ProblemTable: React.FC<ProblemTableProps> = ({
           <option value={Difficulty.Hard}>Hard</option>
         </select>
 
-        <div className="ml-auto text-xs text-slate-500">
+        <div className="w-full sm:w-auto sm:ml-auto text-xs text-slate-500 text-center sm:text-right">
           Showing {filteredProblems.length} / {problems.length}
         </div>
       </div>
 
-      {/* Table Content */}
-      <div className="flex-1 overflow-auto pb-48">
+      {/* Desktop Table Content */}
+      <div className="hidden lg:block flex-1 overflow-auto pb-48">
         <table className="w-full text-left border-collapse">
           <thead className="bg-dark-800 sticky top-0 z-10 shadow-sm">
             <tr>
@@ -182,6 +183,89 @@ export const ProblemTable: React.FC<ProblemTableProps> = ({
             <div className="flex flex-col items-center justify-center py-20 text-slate-500">
                 <p>No problems match your filters.</p>
             </div>
+        )}
+      </div>
+
+      {/* Mobile Card Layout */}
+      <div className="lg:hidden flex-1 overflow-auto p-3 space-y-3">
+        {filteredProblems.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-slate-500">
+            <p>No problems match your filters.</p>
+          </div>
+        ) : (
+          filteredProblems.map((problem) => (
+            <div 
+              key={problem.id} 
+              className="bg-dark-800 border border-dark-700 rounded-lg p-4 space-y-3"
+            >
+              {/* Header: ID and Difficulty */}
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500 font-mono text-xs">#{problem.id}</span>
+                <span className={`text-xs px-2 py-0.5 rounded-full border ${getDifficultyColor(problem.difficulty)}`}>
+                  {problem.difficulty}
+                </span>
+              </div>
+
+              {/* Title */}
+              <h3 className="text-slate-200 font-medium text-sm leading-tight">
+                {problem.title}
+              </h3>
+
+              {/* Topics */}
+              {problem.topics && (
+                <div className="flex flex-wrap gap-1">
+                  {problem.topics.split(',').slice(0, 3).map((topic, idx) => (
+                    <span 
+                      key={idx} 
+                      className="text-xs px-2 py-0.5 rounded bg-primary-500/10 text-primary-400 border border-primary-500/20"
+                    >
+                      {topic.trim()}
+                    </span>
+                  ))}
+                  {problem.topics.split(',').length > 3 && (
+                    <span className="text-xs px-2 py-0.5 text-slate-500">
+                      +{problem.topics.split(',').length - 3}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {/* Stats */}
+              <div className="flex items-center gap-4 text-xs text-slate-400">
+                <span>Acceptance: {problem.acceptance}</span>
+                <span>Frequency: {problem.frequency}</span>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-2 pt-2 border-t border-dark-700">
+                <button 
+                  onClick={() => handleAddToMyProblems(problem)}
+                  disabled={addingProblem === problem.id}
+                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-green-400 hover:text-green-300 bg-green-400/10 hover:bg-green-400/20 rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  title="Add to My Problems"
+                >
+                  <Plus size={16} />
+                  <span className="text-xs font-medium">Add</span>
+                </button>
+                <button 
+                  onClick={() => onAskAI(problem)}
+                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-purple-400 hover:text-purple-300 bg-purple-400/10 hover:bg-purple-400/20 rounded transition-colors"
+                  title="Get Hint from AI"
+                >
+                  <Sparkles size={16} />
+                  <span className="text-xs font-medium">Hint</span>
+                </button>
+                <a 
+                  href={problem.url} 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  className="flex items-center justify-center p-2 text-slate-400 hover:text-white bg-dark-700 hover:bg-dark-600 rounded transition-colors"
+                >
+                  <ExternalLink size={16} />
+                </a>
+              </div>
+            </div>
+          ))
         )}
       </div>
 

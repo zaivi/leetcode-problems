@@ -122,19 +122,19 @@ export const MyProblems: React.FC<MyProblemsProps> = ({
   return (
     <div className="flex flex-col h-full bg-dark-900">
       {/* Filters Toolbar */}
-      <div className="p-4 border-b border-dark-700 flex flex-wrap gap-4 items-center bg-dark-800/50">
+      <div className="p-3 sm:p-4 border-b border-dark-700 flex flex-wrap gap-2 sm:gap-4 items-center bg-dark-800/50">
         <input
           type="text"
-          placeholder="Search problems or topics..."
+          placeholder="Search problems..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="bg-dark-900 border border-dark-700 rounded px-3 py-1.5 text-sm text-slate-200 focus:border-primary-500 outline-none w-64"
+          className="bg-dark-900 border border-dark-700 rounded px-3 py-1.5 text-sm text-slate-200 focus:border-primary-500 outline-none w-full sm:w-64"
         />
 
         <select
           value={filterDifficulty}
           onChange={(e) => setFilterDifficulty(e.target.value)}
-          className="bg-dark-900 border border-dark-700 rounded px-3 py-1.5 text-sm text-slate-200 focus:border-primary-500 outline-none"
+          className="bg-dark-900 border border-dark-700 rounded px-3 py-1.5 text-sm text-slate-200 focus:border-primary-500 outline-none flex-1 sm:flex-initial"
         >
           <option value="All">All Difficulties</option>
           <option value="Easy">Easy</option>
@@ -145,7 +145,7 @@ export const MyProblems: React.FC<MyProblemsProps> = ({
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value as any)}
-          className="bg-dark-900 border border-dark-700 rounded px-3 py-1.5 text-sm text-slate-200 focus:border-primary-500 outline-none"
+          className="bg-dark-900 border border-dark-700 rounded px-3 py-1.5 text-sm text-slate-200 focus:border-primary-500 outline-none flex-1 sm:flex-initial"
         >
           <option value="All">All Statuses</option>
           <option value={Status.NotStarted.toString()}>Not Started</option>
@@ -155,13 +155,13 @@ export const MyProblems: React.FC<MyProblemsProps> = ({
           <option value={Status.Revise.toString()}>Revise</option>
         </select>
 
-        <div className="ml-auto text-xs text-slate-500">
+        <div className="w-full sm:w-auto sm:ml-auto text-xs text-slate-500 text-center sm:text-right">
           Showing {filteredProblems.length} / {problems.length}
         </div>
       </div>
 
-      {/* Table Content */}
-      <div className="flex-1 overflow-auto">
+      {/* Desktop Table Content */}
+      <div className="hidden lg:block flex-1 overflow-auto">
         {problems.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-slate-500">
             <p className="text-lg mb-2">No problems added yet</p>
@@ -332,6 +332,146 @@ export const MyProblems: React.FC<MyProblemsProps> = ({
           <div className="flex flex-col items-center justify-center py-20 text-slate-500">
             <p>No problems match your filters.</p>
           </div>
+        )}
+      </div>
+
+      {/* Mobile Card Layout */}
+      <div className="lg:hidden flex-1 overflow-auto p-3 space-y-3">
+        {problems.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-slate-500">
+            <p className="text-base mb-2">No problems added yet</p>
+            <p className="text-sm">Go to Explorer tab to add problems to track</p>
+          </div>
+        ) : filteredProblems.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-slate-500">
+            <p>No problems match your filters.</p>
+          </div>
+        ) : (
+          filteredProblems.map((problem) => {
+            const progress = progressMap[problem.id.toString()] || {
+              status: Status.NotStarted,
+              remarks: '',
+            };
+            return (
+              <div 
+                key={problem.id} 
+                className="bg-dark-800 border border-dark-700 rounded-lg p-4 space-y-3"
+              >
+                {/* Header: Status and Difficulty */}
+                <div className="flex items-center justify-between">
+                  <div className="relative" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      onClick={() =>
+                        setOpenDropdownId(openDropdownId === problem.id ? null : problem.id)
+                      }
+                      className="flex items-center gap-2 p-2 rounded hover:bg-dark-700 transition-colors"
+                    >
+                      {getStatusIcon(progress.status)}
+                      <span className="text-xs text-slate-400">{progress.status}</span>
+                    </button>
+
+                    {openDropdownId === problem.id && (
+                      <div className="absolute left-0 top-full mt-1 bg-dark-800 border border-dark-600 rounded-lg shadow-xl z-50 p-1 w-36">
+                        {Object.values(Status).map((s) => (
+                          <button
+                            key={s}
+                            onClick={() => {
+                              onStatusChange(problem.id.toString(), s);
+                              setOpenDropdownId(null);
+                            }}
+                            className={`w-full text-left px-2 py-2 text-xs rounded hover:bg-dark-700 flex items-center gap-2 ${
+                              progress.status === s
+                                ? 'text-primary-400 bg-primary-500/10'
+                                : 'text-slate-300'
+                            }`}
+                          >
+                            {getStatusIcon(s)} {s}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded-full border ${getDifficultyColor(
+                      problem.difficulty
+                    )}`}
+                  >
+                    {problem.difficulty || 'Unknown'}
+                  </span>
+                </div>
+
+                {/* Company */}
+                {problem.company && (
+                  <div className="text-xs text-slate-400">
+                    <span className="text-slate-500">Company:</span> {problem.company}
+                  </div>
+                )}
+
+                {/* Title */}
+                <h3 className="text-slate-200 font-medium text-sm leading-tight">
+                  {problem.title}
+                </h3>
+
+                {/* Topics */}
+                {problem.topics && (
+                  <div className="flex flex-wrap gap-1">
+                    {problem.topics.split(',').slice(0, 3).map((topic, idx) => (
+                      <span 
+                        key={idx} 
+                        className="text-xs px-2 py-0.5 rounded bg-primary-500/10 text-primary-400 border border-primary-500/20"
+                      >
+                        {topic.trim()}
+                      </span>
+                    ))}
+                    {problem.topics.split(',').length > 3 && (
+                      <span className="text-xs px-2 py-0.5 text-slate-500">
+                        +{problem.topics.split(',').length - 3}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {/* Date */}
+                <div className="text-xs text-slate-400">
+                  Added: {new Date(problem.created_at).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                  })}
+                </div>
+
+                {/* Remarks */}
+                <input
+                  type="text"
+                  value={progress.remarks || ''}
+                  onChange={(e) => onRemarkChange(problem.id.toString(), e.target.value)}
+                  placeholder="Add note..."
+                  className="w-full bg-dark-700 border border-dark-600 rounded px-3 py-2 text-sm text-slate-300 placeholder-slate-500 focus:border-primary-500 outline-none"
+                />
+
+                {/* Actions */}
+                <div className="flex items-center gap-2 pt-2 border-t border-dark-700">
+                  <button
+                    onClick={() => handleDelete(problem.id, problem.title || 'this problem')}
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-red-400 hover:text-red-300 bg-red-400/10 hover:bg-red-400/20 rounded transition-colors"
+                    title="Delete Problem"
+                  >
+                    <Trash2 size={16} />
+                    <span className="text-xs font-medium">Delete</span>
+                  </button>
+                  <a
+                    href={problem.link || '#'}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center justify-center p-2 text-slate-400 hover:text-white bg-dark-700 hover:bg-dark-600 rounded transition-colors"
+                  >
+                    <ExternalLink size={16} />
+                  </a>
+                </div>
+              </div>
+            );
+          })
         )}
       </div>
 
