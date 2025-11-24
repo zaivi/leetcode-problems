@@ -1,0 +1,11 @@
+{
+    "name": "worker-name",
+    "compatibility_date": "2025-01-01",
+    "build": {
+      "command": "npm install && npm run build"
+    },
+    "assets": {
+      "directory": "./dist"
+    }
+  }
+  
